@@ -1,8 +1,9 @@
-from flask import Flask
+from flask import Flask, jsonify
 from flask_graphql import GraphQLView
 
 from database import db_session, init_db
 from schema import schema
+from models import Employee as EmployeeModel
 
 
 app = Flask(__name__)
@@ -13,18 +14,14 @@ app.add_url_rule(
     view_func=GraphQLView.as_view(
         'graphql',
         schema=schema,
-        graphiql=True  # for having the GraphiQL interface
+        graphiql=True
     )
 )
 
-# 127.0.0.1:5000/list
-# app.add_url_rule(
-#     '/list'
-# )
-#
-# app.add_url_rule(
-#     '/post'
-# )
+@app.route('/list-employees', methods=['GET'])
+def list_employees():
+    return jsonify([e.serialize for e in db_session.query(EmployeeModel).all()])
+
 
 @app.teardown_appcontext
 def shutdown_session(exception=None):

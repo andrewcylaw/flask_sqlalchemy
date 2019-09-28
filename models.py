@@ -29,3 +29,12 @@ class Employee(Base):
         self.hired_on = hired_on
         self.salary = salary
         self.department = department
+
+    @property
+    def serialize(self):
+        return {
+            'id': self.id,
+            'name': self.name,
+            'salary': self.salary,
+            'departmentName': self.department.name
+        }
