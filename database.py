@@ -23,8 +23,8 @@ def init_db():
     hr = Department(name='Human Resources')
 
     db_session.add_all([engineering, hr])
-    db_session.add(Employee(name='Peter', department=engineering))
-    db_session.add(Employee(name='Roy', department=engineering))
-    db_session.add(Employee(name='Tracy', department=hr))
+    db_session.add(Employee(name='Peter', salary=50000, department=engineering))
+    db_session.add(Employee(name='Roy', salary=75000, department=engineering))
+    db_session.add(Employee(name='Tracy', salary=25000, department=hr))
 
     db_session.commit()

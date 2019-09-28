@@ -29,13 +29,15 @@ class EmployeeConnections(relay.Connection):
 
 class CreateEmployeeInput(graphene.InputObjectType):
     name = graphene.String(description='Name of the new employee.')
-    departmentId = graphene.ID(description='Department id of the new employee.')
+    hired_on = graphene.DateTime(description='When the new employee was hired.')
+    salary = graphene.Int(description='Salary of the new employee.')
+    department_id = graphene.ID(description='Department id of the new employee.')
 
 
 class CreateEmployee(graphene.Mutation):
-    """Create a new employee with name and department."""
+    """Create a new employee with name, hiring date, salary, and department."""
     class Arguments:
-        input = CreateEmployeeInput(description="Required fields", required=True)
+        input = CreateEmployeeInput(description="New employee fields", required=True)
 
     class Meta:
         description = "Creates a new employee with the given name and department."
@@ -43,8 +45,10 @@ class CreateEmployee(graphene.Mutation):
     employee = Field(Employee)
 
     def mutate(self, info, input=None):
-        department = db_session.query(DepartmentModel).filter_by(id=input.departmentId).first()
+        department = db_session.query(DepartmentModel).filter_by(id=input.department_id).first()
         employee = EmployeeModel(name=input.name,
+                                 hired_on=input.hired_on,
+                                 salary=input.salary,
                                  department=department)
 
         db_session.add(employee)
