@@ -15,16 +15,6 @@ app.add_url_rule(
     )
 )
 
-@app.route('/employees/list', methods=['GET'])
-def list_employees():
-    return schema.Employee.list()
-
-
-@app.route('/employees/page', methods=['GET'])
-def page_employees():
-    page_num = request.args.get('page')
-    pass
-
 
 @app.teardown_appcontext
 def shutdown_session(exception=None):

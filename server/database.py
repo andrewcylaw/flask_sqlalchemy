@@ -28,7 +28,7 @@ def init_db():
     db_session.add(Employee(name='Roy', salary=75000, department=engineering))
     db_session.add(Employee(name='Tracy', salary=25000, department=hr))
 
-    # for i in range(50):
-    #     db_session.add(Employee(name='Tracy #' + str(i), salary=25000, department=hr))
+    for i in range(50):
+        db_session.add(Employee(name='Tracy #' + str(i), salary=25000, department=hr))
 
     db_session.commit()

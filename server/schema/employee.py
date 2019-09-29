@@ -1,6 +1,5 @@
 import graphene
-from flask import jsonify
-from graphene import relay, Field
+from graphene import relay, Field, InputObjectType
 from graphene_sqlalchemy import SQLAlchemyObjectType
 from server.model.department import Department as DepartmentModel
 from server.model.employee import Employee as EmployeeModel
@@ -12,17 +11,13 @@ class Employee(SQLAlchemyObjectType):
         model = EmployeeModel
         interfaces = (relay.Node, )
 
-    @staticmethod
-    def list():
-        return jsonify([e.serialize for e in db_session.query(EmployeeModel).all()])
-
-
 class EmployeeConnections(relay.Connection):
     class Meta:
         node = Employee
 
 
-class CreateEmployeeInput(graphene.InputObjectType):
+class CreateEmployeeInput(InputObjectType):
+    """Class representation of employee creation fields."""
     name = graphene.String(description='Name of the new employee.')
     hired_on = graphene.DateTime(description='When the new employee was hired.')
     salary = graphene.Int(description='Salary of the new employee.')
@@ -35,7 +30,7 @@ class CreateEmployee(graphene.Mutation):
         input = CreateEmployeeInput(description="New employee fields", required=True)
 
     class Meta:
-        description = "Creates a new employee with the given name and department."
+        description = 'Creates a new employee with the given inputs.'
 
     employee = Field(Employee)
 
