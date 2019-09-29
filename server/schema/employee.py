@@ -1,25 +1,20 @@
 import graphene
-from graphene import relay, Field, Schema
-from graphene_sqlalchemy import SQLAlchemyObjectType, SQLAlchemyConnectionField
-from models import Department as DepartmentModel, Employee as EmployeeModel
-from database import db_session
-
-
-class Department(SQLAlchemyObjectType):
-    class Meta:
-        model = DepartmentModel
-        interfaces = (relay.Node, )
-
-
-class DepartmentConnection(relay.Connection):
-    class Meta:
-        node = Department
+from flask import jsonify
+from graphene import relay, Field
+from graphene_sqlalchemy import SQLAlchemyObjectType
+from server.model.department import Department as DepartmentModel
+from server.model.employee import Employee as EmployeeModel
+from server.database import db_session
 
 
 class Employee(SQLAlchemyObjectType):
     class Meta:
         model = EmployeeModel
         interfaces = (relay.Node, )
+
+    @staticmethod
+    def list():
+        return jsonify([e.serialize for e in db_session.query(EmployeeModel).all()])
 
 
 class EmployeeConnections(relay.Connection):
@@ -55,18 +50,3 @@ class CreateEmployee(graphene.Mutation):
         db_session.commit()
 
         return CreateEmployee(employee=employee)
-
-
-class Query(graphene.ObjectType):
-    node = relay.Node.Field()
-    # Allows sorting over multiple columns, by default over the primary key
-    all_employees = SQLAlchemyConnectionField(EmployeeConnections)
-
-    # Disable sorting over this field
-    all_departments = SQLAlchemyConnectionField(DepartmentConnection, sort=None)
-
-
-class Mutation(graphene.ObjectType):
-    create_employee = CreateEmployee.Field()
-
-schema = Schema(query=Query, mutation=Mutation)

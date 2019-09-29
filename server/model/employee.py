@@ -1,13 +1,7 @@
 from sqlalchemy import *
 from sqlalchemy.orm import relationship, backref
-from database import Base
-
-
-class Department(Base):
-    """Department model."""
-    __tablename__ = 'department'
-    id = Column(Integer, primary_key=True)
-    name = Column(String)
+from server.database import Base
+from .department import Department
 
 
 class Employee(Base):
