@@ -1,5 +1,5 @@
 from sqlalchemy import *
-from server.database import Base
+from database import Base
 
 
 class Department(Base):

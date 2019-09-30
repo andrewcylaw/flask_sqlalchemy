@@ -4,9 +4,9 @@ from graphene import relay, Field, InputObjectType, Int, Boolean, List, ObjectTy
 from graphene_sqlalchemy import SQLAlchemyObjectType
 
 from schema.paging import PagingInfo, SortingDirection
-from server.model.department import Department as DepartmentModel
-from server.model.employee import Employee as EmployeeModel
-from server.database import db_session
+from model.department import Department as DepartmentModel
+from model.employee import Employee as EmployeeModel
+from database import db_session
 
 
 class Employee(SQLAlchemyObjectType):

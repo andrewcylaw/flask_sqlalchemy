@@ -14,8 +14,8 @@ def init_db():
     """
     Initializes the database with some starter data.
     """
-    from server.model.department import Department
-    from server.model.employee import Employee
+    from model.department import Department
+    from model.employee import Employee
     Base.metadata.drop_all(bind=engine)
     Base.metadata.create_all(bind=engine)
 

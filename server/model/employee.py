@@ -1,6 +1,6 @@
 from sqlalchemy import *
 from sqlalchemy.orm import relationship, backref
-from server.database import Base
+from database import Base
 from .department import Department
 
 
