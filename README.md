@@ -8,12 +8,18 @@
 4. Install the dependencies in the virtual env: `pip install -r requirements.txt`
 5. Start the Flask app: `python ./server/app.py`
 6. Open `http://127.0.0.1:5000/` to use GraphiQL and run queries.
+7. To run tests: 
+```
+cd ./server
+python -m unittest discover
+```
+
 
 ## Interview Questions
 
 **What are some of the challenges in implementing this solution on a database that constantly adds, deletes and updates records?**
 
-* The possibility that some items are either skipped altogether or shown twice.
+* There is the possibility that some items are either skipped altogether or shown twice.
 * Items can shift positions in the database if the database has been modified after the user loads a page but before the load the next one and rows have been inserted before/after the pagination offset. 
 
 
@@ -103,4 +109,5 @@ query offsetPagination {
 ```
 
 ## Misc. Implementation Notes
+* Unit tests are implemented using Python's builtin package `unittest`.
 * Department is not mandatory in the employee table, making it possible to create employees with `null` departments.

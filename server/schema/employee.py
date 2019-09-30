@@ -3,7 +3,7 @@ import math
 from graphene import relay, Field, InputObjectType, Int, Boolean, List, ObjectType, String, DateTime, ID, Mutation
 from graphene_sqlalchemy import SQLAlchemyObjectType
 
-from schema.paging import PagingInfo, SortingDirection
+from schema.paging import PagingInfo, SortingDirection, DEFAULT_PAGE_SIZE
 from model.department import Department as DepartmentModel
 from model.employee import Employee as EmployeeModel
 from database import db_session
@@ -52,12 +52,19 @@ class EmployeePage(ObjectType):
 
     # Generate paging information metadata.
     def resolve_paging_info(parent, info):
-        page_num = parent.paging_parameters.page_num
-        page_size = parent.paging_parameters.page_size
-        total_num_pages = math.ceil(Employee.get_query(info).count() / page_size)
+        total_num_items = Employee.get_query(info).count()
 
-        return PagingInfo(page_num=page_num,
-                          page_size=page_size,
+        # Bound given page_size if <1 or >total number of items
+        if parent.paging_parameters.page_size < 0 or parent.paging_parameters.page_size > total_num_items:
+            parent.paging_parameters.page_size = DEFAULT_PAGE_SIZE
+
+        total_num_pages = math.ceil(total_num_items / parent.paging_parameters.page_size)
+
+        # Bound given page_num if it exceeds 0 or max number of pages
+        parent.paging_parameters.page_num = page_num = max(1, min(total_num_pages, parent.paging_parameters.page_num))
+
+        return PagingInfo(page_num=parent.paging_parameters.page_num,
+                          page_size=parent.paging_parameters.page_size,
                           total_num_pages=total_num_pages,
                           has_next_page=not (page_num >= total_num_pages),
                           has_prev_page=page_num != 1)
@@ -67,7 +74,7 @@ class EmployeePage(ObjectType):
     def resolve_employee_page(parent, info):
         page_num = parent.paging_parameters.page_num
         page_size = parent.paging_parameters.page_size
-        offset = (page_num - 1) * page_size + 1 # For 1-indexed pages
+        offset = (page_num - 1) * page_size # For 1-indexed pages
 
         query = Employee.get_query(info).offset(offset).limit(page_size).from_self()
 

@@ -1,5 +1,7 @@
 from graphene import Int, String, ObjectType, InputObjectType, Boolean, Enum, Field
 
+# Default page size in case of negative or too large page sizes
+DEFAULT_PAGE_SIZE = 10
 
 class SortingDirection(Enum):
     """Enum to determine sorting direction."""
