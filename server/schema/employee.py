@@ -1,10 +1,9 @@
 import math
 
-import graphene
-from graphene import relay, Field, InputObjectType
+from graphene import relay, Field, InputObjectType, Int, Boolean, List, ObjectType, String, DateTime, ID, Mutation
 from graphene_sqlalchemy import SQLAlchemyObjectType
 
-from schema.paging import PagingInfo
+from schema.paging import PagingInfo, SortingDirection
 from server.model.department import Department as DepartmentModel
 from server.model.employee import Employee as EmployeeModel
 from server.database import db_session
@@ -21,8 +20,20 @@ class EmployeeConnections(relay.Connection):
         node = Employee
 
 
-class EmployeePage(graphene.ObjectType):
-    """Retrieve a page of employees with the given page size and page number."""
+class EmployeePage(ObjectType):
+    """Retrieve a page of employees.
+
+    Required args:
+        page_num - Page number to retrieve.
+        page_size - Number of items per page.
+
+    Optional args:
+        sorting_field - Field to sort by. Only supports 'department' (department name)
+                        and 'salary' right now.
+        sorting_dir - Sorting direction enum. Either ASC or DESC.
+
+    If the sorting_field is present but sorting_dir is not, defaults to ASC.
+    """
     class Meta:
         model = EmployeeModel
 
@@ -30,15 +41,16 @@ class EmployeePage(graphene.ObjectType):
         super().__init__(*args, **kwargs)
         self.paging_parameters = args[0]
 
-    paging_info = graphene.Field(PagingInfo,
-                                 page_num=graphene.Int(),
-                                 page_size=graphene.Int(),
-                                 total_num_pages=graphene.Int(),
-                                 has_next_page=graphene.Boolean(),
-                                 has_prev_page=graphene.Boolean())
-    employee_page = graphene.List(Employee)
+    paging_info = Field(PagingInfo,
+                        page_num=Int(),
+                        page_size=Int(),
+                        total_num_pages=Int(),
+                        has_next_page=Boolean(),
+                        has_prev_page=Boolean())
+    employee_page = List(Employee)
 
-    # Paginate via offset pagination. Pages are 1-indexed!
+
+    # Generate paging information metadata.
     def resolve_paging_info(parent, info):
         page_num = parent.paging_parameters.page_num
         page_size = parent.paging_parameters.page_size
@@ -51,26 +63,45 @@ class EmployeePage(graphene.ObjectType):
                           has_prev_page=page_num != 1)
 
 
+    # Fetch a page via offset pagination. Pages are 1-indexed!
     def resolve_employee_page(parent, info):
         page_num = parent.paging_parameters.page_num
         page_size = parent.paging_parameters.page_size
         offset = (page_num - 1) * page_size + 1 # For 1-indexed pages
 
-        return Employee.get_query(info).offset(offset).limit(page_size).all()
+        query = Employee.get_query(info).offset(offset).limit(page_size).from_self()
+
+        # Check for applicable sorting column and direction
+        sorting_by = parent.paging_parameters.sorting_field
+        sorting_dir = parent.paging_parameters.sorting_dir
+
+        if sorting_by == 'department':
+            if sorting_dir == SortingDirection.DESC.value:
+                query = query.join(DepartmentModel).order_by(DepartmentModel.name.desc())
+            else:
+                query = query.join(DepartmentModel).order_by(DepartmentModel.name.asc())
+
+        elif sorting_by == 'salary':
+            if sorting_dir == SortingDirection.DESC.value:
+                query = query.order_by(EmployeeModel.salary.desc())
+            else:
+                query = query.order_by(EmployeeModel.salary.asc())
+
+        return query.all()
 
 
 class CreateEmployeeInput(InputObjectType):
     """Class representation of employee creation fields."""
-    name = graphene.String(description='Name of the new employee.')
-    hired_on = graphene.DateTime(description='When the new employee was hired.')
-    salary = graphene.Int(description='Salary of the new employee.')
-    department_id = graphene.ID(description='Department id of the new employee.')
+    name = String(description='Name of the new employee.')
+    hired_on = DateTime(description='When the new employee was hired.')
+    salary = Int(description='Salary of the new employee.')
+    department_id = ID(description='Department id of the new employee.')
 
 
-class CreateEmployee(graphene.Mutation):
+class CreateEmployee(Mutation):
     """Create a new employee with name, hiring date, salary, and department."""
     class Arguments:
-        input = CreateEmployeeInput(description="New employee fields", required=True)
+        input = CreateEmployeeInput(description='New employee fields', required=True)
 
     class Meta:
         description = 'Creates a new employee with the given inputs.'

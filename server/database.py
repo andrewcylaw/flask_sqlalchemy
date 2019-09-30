@@ -22,13 +22,20 @@ def init_db():
     # Create the fixtures
     engineering = Department(name='Engineering')
     hr = Department(name='Human Resources')
+    marketing = Department(name='Marketing')
 
-    db_session.add_all([engineering, hr])
+    db_session.add_all([engineering, hr, marketing])
     db_session.add(Employee(name='Peter', salary=50000, department=engineering))
     db_session.add(Employee(name='Roy', salary=75000, department=engineering))
     db_session.add(Employee(name='Tracy', salary=25000, department=hr))
 
+    # Arbitrarily produce data
     for i in range(50):
-        db_session.add(Employee(name='Tracy #' + str(i), salary=25000, department=hr))
+        if i % 3 == 0:
+            db_session.add(Employee(name='George #' + str(i), salary=25000 + i, department=hr))
+        elif i % 2 == 0:
+            db_session.add(Employee(name='Samuel #' + str(i), salary=60000 - i, department=marketing))
+        else:
+            db_session.add(Employee(name='Albert #' + str(i), salary=12000 - i, department=engineering))
 
     db_session.commit()

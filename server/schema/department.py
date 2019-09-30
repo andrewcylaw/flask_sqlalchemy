@@ -8,6 +8,7 @@ class Department(SQLAlchemyObjectType):
         model = DepartmentModel
         interfaces = (relay.Node, )
 
+
 class DepartmentConnection(relay.Connection):
     class Meta:
         node = Department

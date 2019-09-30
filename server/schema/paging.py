@@ -1,10 +1,19 @@
-from graphene import Int, ObjectType, InputObjectType, Boolean
+from graphene import Int, String, ObjectType, InputObjectType, Boolean, Enum, Field
+
+
+class SortingDirection(Enum):
+    """Enum to determine sorting direction."""
+    DESC = 0
+    ASC = 1
 
 
 class PagingParameters(InputObjectType):
     """Contains paging input parameters from a query."""
     page_num = Int(required=True)
     page_size = Int(required=True)
+    sorting_field = String(required=False)
+    sorting_dir = Field(SortingDirection, required=False)
+
 
 class PagingInfo(ObjectType):
     """Contains paging information for this model to be returned."""
