@@ -89,7 +89,7 @@ class EmployeePaginationTests(TestCase):
         page_num = 1
         per_page_results = EmployeePaginationHelper(page_num=page_num, page_size=10).fetch_results(self.client)
 
-        # Simulate navigating page by page to the last page
+        # Simulate navigating page by page to the last page and collect results
         while page_num <= per_page_results['pagingInfo']['totalNumPages']:
             page_num += 1
             total_results.extend(per_page_results['employeePage'])

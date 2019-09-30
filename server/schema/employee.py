@@ -53,21 +53,23 @@ class EmployeePage(ObjectType):
     # Generate paging information metadata.
     def resolve_paging_info(parent, info):
         total_num_items = Employee.get_query(info).count()
+        params = parent.paging_parameters
 
         # Bound given page_size if <1 or >total number of items
-        if parent.paging_parameters.page_size < 0 or parent.paging_parameters.page_size > total_num_items:
-            parent.paging_parameters.page_size = DEFAULT_PAGE_SIZE
+        if params.page_size < 0 or params.page_size > total_num_items:
+            params.page_size = DEFAULT_PAGE_SIZE
 
-        total_num_pages = math.ceil(total_num_items / parent.paging_parameters.page_size)
+        total_num_pages = math.ceil(total_num_items / params.page_size)
 
-        # Bound given page_num if it exceeds 0 or max number of pages
-        parent.paging_parameters.page_num = page_num = max(1, min(total_num_pages, parent.paging_parameters.page_num))
+        # Bound given page_num if <1 or >max number of pages
+        if params.page_num < 0 or params.page_num > total_num_pages:
+            params.page_num = 1
 
-        return PagingInfo(page_num=parent.paging_parameters.page_num,
-                          page_size=parent.paging_parameters.page_size,
+        return PagingInfo(page_num=params.page_num,
+                          page_size=params.page_size,
                           total_num_pages=total_num_pages,
-                          has_next_page=not (page_num >= total_num_pages),
-                          has_prev_page=page_num != 1)
+                          has_next_page=not (params.page_num >= total_num_pages),
+                          has_prev_page=params.page_num != 1)
 
 
     # Fetch a page via offset pagination. Pages are 1-indexed!

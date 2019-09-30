@@ -2,7 +2,7 @@
 
 ## Project Setup
 0. **Requirements: Python, pip, and virtualenv**
-1. Clone this repository `git clone https://github.com/andrewcylaw/flask_sqlalchemy.git`
+1. Clone this repository `git clone https://github.com/andrewcylaw/flask_sqlalchemy.git` and `cd flask_sqlalchemy`
 2. From the root directory, create a virtual env: `virtualenv env`.
 3. Activate the virtual env (I used Windows powershell): `.\env\Scripts\activate.ps1`
 4. Install the dependencies in the virtual env: `pip install -r requirements.txt`
@@ -110,4 +110,4 @@ query offsetPagination {
 
 ## Misc. Implementation Notes
 * Unit tests are implemented using Python's builtin package `unittest`.
-* Department is not mandatory in the employee table, making it possible to create employees with `null` departments.
+* Department (and other fields) is not mandatory in the employee table, making it possible to create employees with `null` departments.
